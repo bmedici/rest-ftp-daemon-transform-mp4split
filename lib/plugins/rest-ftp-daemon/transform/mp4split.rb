@@ -1,10 +1,10 @@
 require 'open3'
 
 module RestFtpDaemon::Transform
-  class Mp4split < Base
   class TransformVideoMissing    < TransformError; end
   class TransformVideoError       < TransformError; end
 
+  class TransformMp4split < TaskTransform
 
     # Task attributes
     def task_icon
@@ -13,8 +13,6 @@ module RestFtpDaemon::Transform
 
     # Task operations
     def prepare
-      super
-
       # Init
       @command = @config[:command]
 
