@@ -2,6 +2,9 @@ require 'open3'
 
 module RestFtpDaemon::Transform
   class Mp4split < Base
+  class TransformVideoMissing    < TransformError; end
+  class TransformVideoError       < TransformError; end
+
 
     # Task attributes
     def task_icon
@@ -16,15 +19,15 @@ module RestFtpDaemon::Transform
       @command = @config[:command]
 
       # Ensure MP4SPLIT lib is available
-      raise RestFtpDaemon::Transform::ErrorMissingBinary, "mp4split binary not found: #{@config[:command]}" unless File.exist? (@command)
-      raise RestFtpDaemon::Transform::ErrorMissingBinary, "mp4split binary not executable: #{@config[:command]}" unless File.executable? (@command)
+      raise Task::TransformMissingBinary, "mp4split binary not found: #{@config[:command]}" unless File.exist? (@command)
+      raise Task::TransformMissingBinary, "mp4split binary not executable: #{@config[:command]}" unless File.executable? (@command)
 
       # Ensure MP4SPLIT licence is available
       @licence = @config[:licence]
-      raise RestFtpDaemon::Transform::ErrorMissingBinary, "mp4split licence not found: #{@config[:licence]}" unless @config[:licence]
+      raise Task::TransformMissingBinary, "mp4split licence not found: #{@config[:licence]}" unless @config[:licence]
 
       # Target loc should have a name
-      raise RestFtpDaemon::TargetNameRequired, "mp4split requires target to provided a filename"  unless target_loc.name
+      raise Task::TargetNameRequired, "mp4split requires target to provided a filename"  unless target_loc.name
     end
 
     def process
@@ -70,12 +73,12 @@ module RestFtpDaemon::Transform
 
       # If we get anything on stderr => failed
       unless status.success?
-        raise RestFtpDaemon::TaskFailed, "stderr: #{stderr}"
+        raise Task::AssertionFailed, "stderr: #{stderr}"
       end
 
       # Check we have the expected output file
       unless File.exist? (output_file)
-        raise RestFtpDaemon::Transform::ErrorMissingOutput, "can't find the expected output file at: #{output_file}"
+        raise Task::TransformMissingOutput, "can't find the expected output file at: #{output_file}"
       end
     end
 
